@@ -9,6 +9,7 @@ This is a service reserved for authentication and authorization based on Oauth2 
 -   Swagger
 -   Docker
 
+
 ## Service configuration
 
 - Database config
