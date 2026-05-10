@@ -103,13 +103,22 @@
 ## 5. Features & Endpoints
 
 ### Auth Feature
-| Method | Path | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| POST | `/auth/register` | Register new account | No |
-| POST | `/auth/login` | Login & receive tokens | No |
-| POST | `/auth/refresh` | Refresh access token | No |
-| POST | `/auth/logout` | Revoke session | Yes |
-| GET | `/auth/me` | Get current user profile | Yes |
+| Method | Path | Description | Auth | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| POST | `/auth/register` | Register new account | No | [ ] |
+| POST | `/api/token` | Login & receive tokens (OAuth2) | No | [x] |
+| POST | `/auth/refresh` | Refresh access token | No | [x] |
+| POST | `/auth/logout` | Revoke session | Yes | [ ] |
+| GET | `/auth/me` | Get current user profile | Yes | [x] |
+
+### System Administration (Core)
+| Method | Path | Description | Auth | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| GET | `/v1/account/list` | List all accounts | Yes | [x] |
+| POST | `/v1/account/create` | Create a new account | Yes | [x] |
+| GET | `/v1/group/list` | List all groups/roles | Yes | [x] |
+| POST | `/v1/group/create` | Create a new group | Yes | [x] |
+| GET | `/v1/permission/list` | List all permissions | Yes | [x] |
 
 ### Video Management
 | Method | Path | Description | Auth |

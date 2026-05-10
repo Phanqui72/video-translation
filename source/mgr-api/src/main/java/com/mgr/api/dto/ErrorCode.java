@@ -18,6 +18,7 @@ public class ErrorCode {
     public static final String ACCOUNT_ERROR_EMAIL_EXISTED = "ERROR-ACCOUNT-0006";
     public static final String ACCOUNT_ERROR_INVALID_OTP = "ERROR-ACCOUNT-0007";
     public static final String ACCOUNT_ERROR_OTP_EXPIRED = "ERROR-ACCOUNT-0008";
+    public static final String ACCOUNT_ERROR_WRONG_OTP = "ERROR-ACCOUNT-0009";
 
     /**
      * Starting error code DATABASE_ERROR

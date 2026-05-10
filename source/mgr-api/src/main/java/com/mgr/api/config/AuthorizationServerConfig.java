@@ -79,7 +79,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer(jdbcTemplate, objectMapper), accessTokenConverter()));
         endpoints
                 .pathMapping("/oauth/authorize", "/api/authorize")
-                .pathMapping("/oauth/token", "/api/token")
+                .pathMapping("/oauth/token", "/token")
                 .authenticationManager(authenticationManager)
                 .tokenEnhancer(tokenEnhancerChain)
                 .tokenGranter(tokenGranter(endpoints))
