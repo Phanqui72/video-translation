@@ -58,8 +58,7 @@ public class AccountController extends ABasicController {
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_C')")
     @Transactional
-    public ApiResponse<String> createAdmin(@Valid @RequestBody CreateAccountAdminForm createAccountAdminForm, BindingResult bindingResult) {
-        ApiResponse<String> apiMessageDto = new ApiResponse<>();
+    public ApiMessageDto<String> createAdmin(@Valid @RequestBody CreateAccountAdminForm createAccountAdminForm, BindingResult bindingResult) {
         Account account = accountRepository.findFirstByUsername(createAccountAdminForm.getUsername()).orElse(null);
         if (!isSuperAdmin()) {
             throw new BadRequestException("Can not create admin", ErrorCode.ACCOUNT_ERROR_UNABLE_CREATE);
@@ -85,14 +84,12 @@ public class AccountController extends ABasicController {
         }
         accountRepository.save(account);
 
-        apiMessageDto.setMessage("Create an account admin success.");
-        return apiMessageDto;
+        return makeSuccessResponse("Create an account admin success.");
     }
 
     @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_U')")
-    public ApiResponse<String> updateAdmin(@Valid @RequestBody UpdateAccountAdminForm updateAccountAdminForm, BindingResult bindingResult) {
-        ApiResponse<String> apiMessageDto = new ApiResponse<>();
+    public ApiMessageDto<String> updateAdmin(@Valid @RequestBody UpdateAccountAdminForm updateAccountAdminForm, BindingResult bindingResult) {
         if (!isSuperAdmin()) {
             throw new BadRequestException("Can not update admin", ErrorCode.ACCOUNT_ERROR_UNABLE_UPDATE);
         }
@@ -121,40 +118,31 @@ public class AccountController extends ABasicController {
         account.setPhone(updateAccountAdminForm.getPhone());
         accountRepository.save(account);
 
-        apiMessageDto.setMessage("Update account admin success.");
-        return apiMessageDto;
-
+        return makeSuccessResponse("Update account admin success.");
     }
 
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_V')")
-    public ApiResponse<Account> getAccount(@PathVariable("id") Long id) {
-        ApiResponse<Account> apiMessageDto = new ApiResponse<>();
+    public ApiMessageDto<AccountDto> getAccount(@PathVariable("id") Long id) {
         Account account = accountRepository.findById(id).orElse(null);
         if (account == null) {
             throw new NotFoundException("Account not found!", ErrorCode.ACCOUNT_ERROR_NOT_FOUND);
         }
-        apiMessageDto.setData(account);
-        apiMessageDto.setMessage("Get account success.");
-        return apiMessageDto;
+        return makeSuccessResponse(accountMapper.fromAccountToDto(account), "Get account success.");
     }
 
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<AccountDto> profile() {
+    public ApiMessageDto<AccountDto> profile() {
         long id = getCurrentUser();
         Account account = accountRepository.findById(id).orElse(null);
-        ApiResponse<AccountDto> apiMessageDto = new ApiResponse<>();
         if (account == null) {
             throw new NotFoundException("Account not found!", ErrorCode.ACCOUNT_ERROR_NOT_FOUND);
         }
-        apiMessageDto.setData(accountMapper.fromAccountToDto(account));
-        apiMessageDto.setMessage("Get Account success");
-        return apiMessageDto;
+        return makeSuccessResponse(accountMapper.fromAccountToDto(account), "Get Account success");
     }
 
     @PutMapping(value = "/update-profile", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<String> updateProfile(@Valid @RequestBody UpdateProfileAdminForm updateProfileAdminForm, BindingResult bindingResult) {
-        ApiResponse<String> apiMessageDto = new ApiResponse<>();
+    public ApiMessageDto<String> updateProfile(@Valid @RequestBody UpdateProfileAdminForm updateProfileAdminForm, BindingResult bindingResult) {
         long id = getCurrentUser();
         var account = accountRepository.findById(id).orElse(null);
         if (account == null) {
@@ -172,35 +160,28 @@ public class AccountController extends ABasicController {
         account.setAvatarPath(updateProfileAdminForm.getAvatarPath());
         accountRepository.save(account);
 
-        apiMessageDto.setMessage("Update admin account success");
-        return apiMessageDto;
+        return makeSuccessResponse("Update admin account success");
     }
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_L')")
-    public ApiResponse<ResponseListDto<AccountDto>> listAccount(AccountCriteria accountCriteria, Pageable pageable) {
+    public ApiMessageDto<ResponseListDto<AccountDto>> listAccount(AccountCriteria accountCriteria, Pageable pageable) {
         if (!isSuperAdmin()) {
             throw new UnauthorizationException("Not allowed to list account.");
         }
-        ApiResponse<ResponseListDto<AccountDto>> apiMessageDto = new ApiResponse<>();
         Page<Account> page = accountRepository.findAll(accountCriteria.getSpecification(), pageable);
         ResponseListDto<AccountDto> responseListDto = new ResponseListDto(accountMapper.fromEntityToAccountDtoList(page.getContent()), page.getTotalElements(), page.getTotalPages());
-        apiMessageDto.setData(responseListDto);
-        apiMessageDto.setMessage("List account success.");
-        return apiMessageDto;
+        return makeSuccessResponse(responseListDto, "List account success.");
     }
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<ResponseListDto<AccountDto>> autoComplete(AccountCriteria accountCriteria, Pageable pageable) {
+    public ApiMessageDto<ResponseListDto<AccountDto>> autoComplete(AccountCriteria accountCriteria, Pageable pageable) {
         accountCriteria.setStatus(MgrConstant.STATUS_ACTIVE);
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                 Sort.by(Sort.Order.desc("createdDate")));
-        ApiResponse<ResponseListDto<AccountDto>> apiMessageDto = new ApiResponse<>();
         Page<Account> page = accountRepository.findAll(accountCriteria.getSpecification(), pageable);
         ResponseListDto<AccountDto> responseListDto = new ResponseListDto(accountMapper.convertAccountToAutoCompleteDto(page.getContent()), page.getTotalElements(), page.getTotalPages());
-        apiMessageDto.setData(responseListDto);
-        apiMessageDto.setMessage("List account success.");
-        return apiMessageDto;
+        return makeSuccessResponse(responseListDto, "List account success.");
     }
 
     @Transactional

@@ -37,8 +37,6 @@ public class PermissionController extends ABasicController {
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('PER_C')")
     public ApiMessageDto<String> create(@Valid @RequestBody CreatePermissionForm createPermissionForm, BindingResult bindingResult) {
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-
         Permission permission = permissionRepository.findFirstByName(createPermissionForm.getName());
         if (permission != null) {
             throw new BadRequestException("Permission name is existed!", ErrorCode.PERMISSION_ERROR_NAME_EXISTED);
@@ -49,18 +47,14 @@ public class PermissionController extends ABasicController {
         }
         permission = permissionMapper.fromCreatePermissionFormToEntity(createPermissionForm);
         permissionRepository.save(permission);
-        apiMessageDto.setMessage("Create a new permission success.");
-        return apiMessageDto;
+        return makeSuccessResponse("Create a new permission success.");
     }
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('PER_L')")
     public ApiMessageDto<ResponseListDto<PermissionDto>> listPermissions(PermissionCriteria permissionCriteria) {
-        ApiMessageDto<ResponseListDto<PermissionDto>> apiMessageDto = new ApiMessageDto<>();
         Page<Permission> page = permissionRepository.findAll(permissionCriteria.getSpecification(), PageRequest.of(0, 1000, Sort.by(new Sort.Order(Sort.Direction.DESC, "createdDate"))));
         ResponseListDto<PermissionDto> responseListDto = new ResponseListDto(permissionMapper.fromEntityToPermissionDtoList(page.getContent()), page.getTotalElements(), page.getTotalPages());
-        apiMessageDto.setData(responseListDto);
-        apiMessageDto.setMessage("List permissions success.");
-        return apiMessageDto;
+        return makeSuccessResponse(responseListDto, "List permissions success.");
     }
 }

@@ -49,7 +49,6 @@ public class GroupController extends ABasicController {
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('GR_C')")
     public ApiMessageDto<String> create(@Valid @RequestBody CreateGroupForm createGroupForm, BindingResult bindingResult) {
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         Group group = groupRepository.findFirstByName(createGroupForm.getName());
         if (group != null) {
             throw new BadRequestException("Group name is exist!", ErrorCode.GROUP_ERROR_NAME_EXISTED);
@@ -64,14 +63,12 @@ public class GroupController extends ABasicController {
         }
         group.setPermissions(permissions);
         groupRepository.save(group);
-        apiMessageDto.setMessage("Create a new group success.");
-        return apiMessageDto;
+        return makeSuccessResponse("Create a new group success.");
     }
 
     @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('GR_U')")
     public ApiMessageDto<String> update(@Valid @RequestBody UpdateGroupForm updateGroupForm, BindingResult bindingResult) {
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         Group group;
         if (isSuperAdmin()) {
             group = groupRepository.findById(updateGroupForm.getId()).orElse(null);
@@ -100,14 +97,12 @@ public class GroupController extends ABasicController {
         }
         group.setPermissions(permissions);
         groupRepository.save(group);
-        apiMessageDto.setMessage("Update group success.");
-        return apiMessageDto;
+        return makeSuccessResponse("Update group success.");
     }
 
     @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('GR_V')")
     public ApiMessageDto<Group> get(@PathVariable("id") Long id) {
-        ApiMessageDto<Group> apiMessageDto = new ApiMessageDto<>();
         Group group;
         if (isSuperAdmin()) {
             group = groupRepository.findById(id).orElse(null);
@@ -117,15 +112,12 @@ public class GroupController extends ABasicController {
         if (group == null) {
             throw new NotFoundException("Group not found!", ErrorCode.GROUP_ERROR_NOT_FOUND);
         }
-        apiMessageDto.setData(group);
-        apiMessageDto.setMessage("Get group success.");
-        return apiMessageDto;
+        return makeSuccessResponse(group, "Get group success.");
     }
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('GR_L')")
     public ApiMessageDto<ResponseListDto<Group>> list(GroupCriteria groupCriteria, Pageable pageable) {
-        ApiMessageDto<ResponseListDto<Group>> apiMessageDto = new ApiMessageDto<>();
         Page<Group> groups;
         if (isSuperAdmin()) {
             groups = groupRepository
@@ -136,14 +128,11 @@ public class GroupController extends ABasicController {
                     .findAll(groupCriteria.getSpecification(), PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(new Sort.Order(Sort.Direction.DESC, "createdDate"))));
         }
         ResponseListDto<Group> responseListDto = new ResponseListDto(groups.getContent(), groups.getTotalElements(), groups.getTotalPages());
-        apiMessageDto.setData(responseListDto);
-        apiMessageDto.setMessage("List group success.");
-        return apiMessageDto;
+        return makeSuccessResponse(responseListDto, "List group success.");
     }
 
     @GetMapping(value = "/auto-complete", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<ResponseListDto<GroupDto>> autoCompleteGroup(GroupCriteria groupCriteria, @PageableDefault(size = 10) Pageable pageable) {
-        ApiMessageDto<ResponseListDto<GroupDto>> apiMessageDto = new ApiMessageDto<>();
         Page<Group> groups;
         if (isSuperAdmin()) {
             groups = groupRepository
@@ -154,8 +143,6 @@ public class GroupController extends ABasicController {
                     .findAll(groupCriteria.getSpecification(), PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(new Sort.Order(Sort.Direction.DESC, "createdDate"))));
         }
         ResponseListDto<GroupDto> responseListDto = new ResponseListDto(groupMapper.fromEntityToGroupDtoAutoCompleteList(groups.getContent()), groups.getTotalElements(), groups.getTotalPages());
-        apiMessageDto.setData(responseListDto);
-        apiMessageDto.setMessage("Auto complete group success.");
-        return apiMessageDto;
+        return makeSuccessResponse(responseListDto, "Auto complete group success.");
     }
 }
