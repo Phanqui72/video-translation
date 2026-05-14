@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { projectApi, type ProjectDto } from '../../../services/video.service';
 import { useAuthStore } from '../../../store/auth.store';
 
 const DashboardPage = () => {
+    const navigate = useNavigate();
     const [projects, setProjects] = useState<ProjectDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -182,7 +183,11 @@ const DashboardPage = () => {
                                     ) : projects.length > 0 ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             {projects.map((project) => (
-                                                <div key={project.id} className="group bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all cursor-pointer">
+                                                <div 
+                                                    key={project.id} 
+                                                    onClick={() => navigate(`/editor/${project.id}`)}
+                                                    className="group bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all cursor-pointer"
+                                                >
                                                     <div className="aspect-video bg-gray-50 relative overflow-hidden">
                                                         <img src={project.thumbnailUrl || 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1074&auto=format&fit=crop'} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

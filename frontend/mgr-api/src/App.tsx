@@ -31,7 +31,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/projects" element={<ProtectedRoute><ProjectManagementPage /></ProtectedRoute>} />
         <Route path="/videos" element={<ProtectedRoute><VideoManagementPage /></ProtectedRoute>} />
-        <Route path="/editor" element={<ProtectedRoute><VideoEditorPage /></ProtectedRoute>} />
+        <Route path="/editor/:projectId" element={<ProtectedRoute><VideoEditorPage /></ProtectedRoute>} />
         <Route path="/ai-pipeline" element={<ProtectedRoute><AIPipelinePage /></ProtectedRoute>} />
 
         {/* Admin Routes */}

@@ -1,11 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { projectApi, videoApi, type ProjectDto, type VideoDto } from '../../../services/video.service';
 
 export const VideoEditorPage = () => {
+    const { projectId } = useParams<{ projectId: string }>();
     const navigate = useNavigate();
+    const [project, setProject] = useState<ProjectDto | null>(null);
+    const [videos, setVideos] = useState<VideoDto[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isExporting, setIsExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState(0);
+    const [selectedVoice, setSelectedVoice] = useState('Cinematic Male (Việt Nam)');
+    const [subtitles, setSubtitles] = useState([
+        { id: 1, text: 'Xin chào thế giới...', width: 128 },
+        { id: 2, text: 'Chào mừng bạn đến với UTEer AI...', width: 192 }
+    ]);
+
+    useEffect(() => {
+        const loadProjectData = async () => {
+            if (!projectId) return;
+            setIsLoading(true);
+            try {
+                const projectRes = await projectApi.get(Number(projectId));
+                if (projectRes.result) {
+                    setProject(projectRes.data);
+                }
+                const videosRes = await videoApi.list(Number(projectId));
+                if (videosRes.result && videosRes.data?.content) {
+                    setVideos(videosRes.data.content);
+                }
+            } catch (error) {
+                console.error('Failed to load project data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadProjectData();
+    }, [projectId]);
 
     const handleExport = () => {
         setIsExporting(true);
@@ -25,37 +57,62 @@ export const VideoEditorPage = () => {
         }, 300);
     };
 
+    if (isLoading) {
+        return (
+            <div className="w-full h-screen bg-[#f9f9fb] flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <p className="text-gray-500 font-medium tracking-tight">Đang tải phòng dựng...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full min-h-screen bg-[#f9f9fb] text-[#1a1c1d]">
-            
+            <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm flex justify-between items-center px-8 h-16">
+                <div className="flex items-center gap-6">
+                    <button 
+                        onClick={() => navigate('/dashboard')}
+                        className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors text-gray-500"
+                    >
+                        <span className="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div className="h-6 w-px bg-gray-200"></div>
+                    <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>movie_edit</span>
+                        <h1 className="font-bold text-lg text-gray-900 tracking-tight">{project?.title || 'Dự án mới'}</h1>
+                        <span className="bg-primary/5 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            {project?.projectStatus || 'DRAFT'}
+                        </span>
+                    </div>
+                </div>
 
-<header className="fixed top-0 w-full z-50 bg-white/70 dark:bg-surface-container/70 backdrop-blur-md border-b border-white/40 shadow-[0_30px_40px_rgba(0,0,0,0.04)] flex justify-between items-center px-margin-desktop py-stack-md">
-<div className="flex items-center gap-stack-md">
-<span className="material-symbols-outlined text-primary hover:scale-105 transition-transform duration-200 cursor-pointer" data-icon="movie_edit">movie_edit</span>
-<h1 className="font-display-lg text-headline-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">UTEer</h1>
-</div>
-<div className="hidden md:flex items-center gap-stack-lg">
-<button className="text-primary font-bold hover:scale-105 transition-transform duration-200">Trình biên tập</button>
-<button className="text-on-surface-variant font-medium hover:scale-105 transition-transform duration-200">Dự án</button>
-<button className="text-on-surface-variant font-medium hover:scale-105 transition-transform duration-200">Thư viện</button>
-</div>
-<div className="flex items-center gap-stack-md">
-<button 
-    onClick={handleExport}
-    disabled={isExporting}
-    className="bg-primary text-on-primary px-stack-md py-stack-sm rounded-full font-label-caps hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
->
-    {isExporting ? 'ĐANG XUẤT...' : 'XUẤT VIDEO'}
-</button>
-<div className="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-white">
-<span className="material-symbols-outlined text-on-primary-fixed" data-icon="person">person</span>
-</div>
-</div>
-</header>
+                <div className="hidden md:flex items-center gap-8">
+                    <button className="text-primary font-bold text-sm">Trình biên tập</button>
+                    <button className="text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors">Cài đặt AI</button>
+                    <button className="text-gray-400 font-medium text-sm hover:text-gray-600 transition-colors">Lịch sử xuất</button>
+                </div>
 
-<main className="flex-1 flex flex-col md:flex-row pt-[80px] h-full overflow-hidden">
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        className="bg-primary text-white px-6 h-10 rounded-xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {isExporting ? (
+                            <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <span className="material-symbols-outlined text-[20px]">ios_share</span>
+                        )}
+                        {isExporting ? 'ĐANG XUẤT...' : 'XUẤT VIDEO'}
+                    </button>
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name=User" className="w-full h-full object-cover" alt="avatar" />
+                    </div>
+                </div>
+            </header>
 
-<aside className="hidden md:flex flex-col w-20 glass-panel border-r border-white/40 items-center py-stack-lg gap-stack-lg">
+            <main className="flex-1 flex flex-col md:flex-row pt-16 h-[calc(100vh-40px)] overflow-hidden">
+                <aside className="hidden md:flex flex-col w-20 bg-white border-r border-gray-200 items-center py-6 gap-8">
 <div className="flex flex-col items-center gap-unit cursor-pointer group">
 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors shadow-sm">
 <span className="material-symbols-outlined" data-icon="video_library">video_library</span>
@@ -124,34 +181,53 @@ export const VideoEditorPage = () => {
 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rotate-45"></div>
 </div>
 
-<div className="h-8 flex items-center gap-stack-sm min-w-max">
-<div className="w-24 text-[10px] font-bold text-on-surface-variant flex items-center px-unit bg-white/20 rounded-lg">SUBTITLES</div>
-<div className="flex gap-1">
-<div className="w-32 h-6 bg-secondary/20 border border-secondary/40 rounded flex items-center px-unit text-[10px] text-secondary font-medium">Xin chào thế giới...</div>
-<div className="w-48 h-6 bg-secondary/20 border border-secondary/40 rounded flex items-center px-unit text-[10px] text-secondary font-medium">Chào mừng bạn đến với UTEer AI...</div>
-</div>
-</div>
+                    <div className="h-8 flex items-center gap-stack-sm min-w-max">
+                        <div className="w-24 text-[10px] font-bold text-gray-400 flex items-center px-3 bg-gray-50 rounded-lg h-6">SUBTITLES</div>
+                        <div className="flex gap-1">
+                            {subtitles.map(sub => (
+                                <div 
+                                    key={sub.id} 
+                                    style={{ width: `${sub.width}px` }}
+                                    className="h-6 bg-blue-50 border border-blue-200 rounded flex items-center px-2 text-[10px] text-blue-600 font-medium truncate hover:bg-blue-100 transition-colors cursor-pointer"
+                                >
+                                    {sub.text}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
-<div className="h-14 flex items-center gap-stack-sm min-w-max">
-<div className="w-24 text-[10px] font-bold text-on-surface-variant flex items-center px-unit bg-white/20 rounded-lg">VIDEO</div>
-<div className="flex">
-<div className="w-[500px] h-12 bg-primary/20 border-2 border-primary rounded-lg overflow-hidden flex relative">
-<img className="w-12 h-full object-cover border-r border-white/20" data-alt="Cinematic movie reel strip background showing multiple frames of a high-tech video production process with vibrant lighting and professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhKaFX1SmHPiMGIgyLyf1qQcWOO0aeH0NYhHczZga7Snl2ubEr5VC6ofUdBU_NYIKCW8CVBrqGhGXOhTK83osWPu5y4hCZ6FVYLkN26rn5RABkEZMtBr100-8kVgX-XYkKOh9sXWIEBFbb82LTNLVl7zuUjwZRBtWKFc1_ARwRQjlnojLhoE9y2EbMzyhZMA6E3zF09JuD_Gwql8VovAs5aHIwZ1HqjaZMWp_E5yS7hs12pgNn8FRjKwVpmH1QMb_w754VSPC3cwI"/>
-<img className="w-12 h-full object-cover border-r border-white/20" data-alt="A professional video editor layout showing a timeline sequence with bright colorful frames and cinematic lighting highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjg-t5kCQ6PMOPuCCu4U608hnQtYPXkPexznY-wrfJWJOaPQi_hqUc3dRQwJSPjAbIBuQUcQ6iAlOtTxqgUyr32LtosezHMkXjTPtezGf2xHsHuutBVv9L-wbR0XlF3c9qDT7ukgpuUe6eT-_8vhNLNfrlEBf1yPNMi_PfWx6c3nsLgqU3sxJQi80Kx2OC5Ago5gC3JPdEjDqxb5rtGIQq5qlslKpOH4Z_82f42C2glO2rdVPa4rMitZTCT8Qb2w_KT4jfNSGtHrE"/>
-<div className="flex-1 flex items-center px-stack-sm text-body-sm font-bold text-primary">Main_Cinematic_Sequence.mp4</div>
-</div>
-</div>
-</div>
+                    <div className="h-14 flex items-center gap-stack-sm min-w-max">
+                        <div className="w-24 text-[10px] font-bold text-gray-400 flex items-center px-3 bg-gray-50 rounded-lg h-6">VIDEO</div>
+                        <div className="flex gap-2">
+                            {videos.length > 0 ? (
+                                videos.map(video => (
+                                    <div key={video.id} className="h-12 bg-primary/5 border border-primary/20 rounded-xl overflow-hidden flex items-center gap-3 pr-4 min-w-[300px]">
+                                        <div className="w-20 h-full bg-gray-200 flex-shrink-0 relative">
+                                            <span className="absolute inset-0 flex items-center justify-center material-symbols-outlined text-gray-400">movie</span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[11px] font-bold text-gray-900 truncate">{video.originalFilename}</p>
+                                            <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">{Math.floor(video.durationSeconds / 60)}:{(video.durationSeconds % 60).toString().padStart(2, '0')} • {video.resolution}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="h-12 bg-gray-50 border border-dashed border-gray-200 rounded-xl flex items-center px-6 text-[10px] text-gray-400 font-medium">
+                                    Chưa có video nào trong dự án này
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-<div className="h-10 flex items-center gap-stack-sm min-w-max">
-<div className="w-24 text-[10px] font-bold text-on-surface-variant flex items-center px-unit bg-white/20 rounded-lg">AI DUBBING</div>
-<div className="flex">
-<div className="w-[480px] h-8 bg-tertiary/10 border border-tertiary/30 rounded-lg flex items-center px-stack-sm text-[10px] text-tertiary italic">
-<span className="material-symbols-outlined text-[14px] mr-1" data-icon="waves">waves</span>
-                                Giọng AI: Cinematic Male (Việt Nam)
+                    <div className="h-10 flex items-center gap-stack-sm min-w-max">
+                        <div className="w-24 text-[10px] font-bold text-gray-400 flex items-center px-3 bg-gray-50 rounded-lg h-6">AI DUBBING</div>
+                        <div className="flex">
+                            <div className="h-8 bg-purple-50 border border-purple-200 rounded-lg flex items-center px-4 text-[10px] text-purple-600 italic gap-2">
+                                <span className="material-symbols-outlined text-[14px]">waves</span>
+                                Giọng AI: {selectedVoice}
                             </div>
-</div>
-</div>
+                        </div>
+                    </div>
 
 <div className="h-10 flex items-center gap-stack-sm min-w-max">
 <div className="w-24 text-[10px] font-bold text-on-surface-variant flex items-center px-unit bg-white/20 rounded-lg">BGM</div>
@@ -210,18 +286,33 @@ export const VideoEditorPage = () => {
 </div>
 </div>
 
-<div className="mb-stack-lg">
-<label className="text-body-sm font-bold text-on-surface-variant mb-stack-sm block">Ngôn ngữ đích</label>
-<div className="relative">
-<div className="w-full bg-white/50 border border-outline-variant px-stack-md py-stack-sm rounded-xl flex items-center justify-between cursor-pointer">
-<div className="flex items-center gap-stack-sm">
-<span className="text-lg">🇻🇳</span>
-<span className="text-body-sm font-medium">Tiếng Việt</span>
-</div>
-<span className="material-symbols-outlined text-on-surface-variant" data-icon="expand_more">expand_more</span>
-</div>
-</div>
-</div>
+                <div className="mb-8">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 block">Ngôn ngữ đích</label>
+                    <div className="relative group">
+                        <div className="w-full bg-gray-50 border border-gray-100 px-4 py-3 rounded-2xl flex items-center justify-between cursor-pointer group-hover:border-primary/20 transition-all">
+                            <div className="flex items-center gap-3">
+                                <span className="text-xl">🇻🇳</span>
+                                <span className="text-sm font-bold text-gray-900">Tiếng Việt</span>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mb-8">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 block">Giọng nói AI</label>
+                    <div className="space-y-2">
+                        {['Cinematic Male (Việt Nam)', 'Natural Female (Việt Nam)', 'Soft Voice (Việt Nam)'].map(voice => (
+                            <button 
+                                key={voice}
+                                onClick={() => setSelectedVoice(voice)}
+                                className={`w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all border ${selectedVoice === voice ? 'bg-primary/5 border-primary text-primary shadow-sm' : 'bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                {voice}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 <button className="mt-auto w-full py-stack-md bg-gradient-to-r from-primary to-secondary text-on-primary rounded-2xl font-display-lg text-body-md shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
                 Áp dụng AI Dubbing
             </button>
