@@ -9,13 +9,17 @@ import {
   LogOut,
   Bell,
   Search,
-  ChevronRight
+  ChevronRight,
+  FolderOpen,
+  Film
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Bảng điều khiển', labelEn: 'Dashboard', path: '/dashboard' },
+  { icon: FolderOpen, label: 'Dự án', labelEn: 'Projects', path: '/projects' },
+  { icon: Film, label: 'Video', labelEn: 'Videos', path: '/videos' },
   { icon: Users, label: 'Người dùng', labelEn: 'Users', path: '/admin/users' },
   { icon: ShieldCheck, label: 'Phân quyền', labelEn: 'RBAC', path: '/admin/rbac' },
   { icon: Activity, label: 'Hoạt động', labelEn: 'Audit Logs', path: '/admin/audit' },

@@ -39,8 +39,8 @@ The platform is an enterprise-grade AI-powered video translation and dubbing sys
 
 ## Missing Critical Features
 - [ ] Resumable Chunked Video Upload System
-- [ ] AI Pipeline Orchestration (Speech-to-Text -> Translation -> TTS -> Lip-sync)
-- [ ] Online Video Editor Timeline Engine (CapCut-like logic)
+- [x] AI Pipeline Orchestration (Speech-to-Text -> Translation -> TTS -> Lip-sync) - UI Implemented
+- [x] Online Video Editor Timeline Engine (CapCut-like logic) - UI Implemented
 - [ ] Distributed Video Rendering & FFmpeg GPU acceleration
 - [ ] Subscription & Billing (Stripe/Paypal & Credit management)
 - [ ] Social Platform API Integrations (TikTok, YouTube, FB)

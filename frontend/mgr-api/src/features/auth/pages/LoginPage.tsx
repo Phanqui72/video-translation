@@ -4,6 +4,7 @@ import { LogIn, User, Lock, Globe, ArrowRight, Eye, EyeOff, AlertCircle } from '
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 import authService from '../../../services/auth.service';
+import { useAuthStore } from '../../../store/auth.store';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,15 +22,17 @@ const LoginPage = () => {
 
     try {
       const data = await authService.login(username, password);
-      // Store tokens
-      localStorage.setItem('access_token', data.access_token);
-      if (data.refresh_token) {
-        localStorage.setItem('refresh_token', data.refresh_token);
-      }
-      // Store user info if available
-      if (data.user_kind !== undefined) {
-        localStorage.setItem('user_kind', data.user_kind);
-      }
+      
+      // The backend returns an OAuth2 response: { access_token, refresh_token, ... }
+      // We also need to fetch the profile to get user info, or use what's in the token
+      // For now, let's just store the tokens and a basic user object
+      const userObj = {
+        username: username,
+        kind: data.user_kind,
+        // We'll let the dashboard fetch the full profile later
+      };
+
+      setAuth(userObj, data.access_token, data.refresh_token || null);
       
       setIsLoading(false);
       // Navigate based on user kind (1 = admin, 2 = user)
@@ -141,7 +145,7 @@ const LoginPage = () => {
                 <input type="checkbox" className="w-4 h-4 rounded border-[#c1c6d7] text-primary focus:ring-primary/20 transition-all" />
                 <span className="text-[11px] font-bold text-[#414755] group-hover:text-primary transition-colors">Ghi nhớ đăng nhập</span>
               </label>
-              <Link to="/forgot-password" size={18} className="text-[11px] text-primary hover:text-secondary transition-colors font-black">
+              <Link to="/forgot-password" className="text-[11px] text-primary hover:text-secondary transition-colors font-black">
                 Quên mật khẩu?
               </Link>
             </div>

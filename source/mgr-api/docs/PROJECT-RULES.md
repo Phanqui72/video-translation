@@ -3,13 +3,15 @@
 ## 1. Tech Stack & Core Principles
 - **Runtime**: Java 11 (OpenJDK).
 - **Framework**: Spring Boot 2.3.0.RELEASE.
+- **Build Tool**: Maven.
+- **Database**: MySQL (Dev/UAT), PostgreSQL (Production).
+- **Migration**: Liquibase (All schema changes must be versioned).
+- **Caching**: Redis (Lettuce client).
+- **Message Broker**: RabbitMQ (For video processing pipeline).
+- **API Documentation**: Swagger 2.9.2.
 - **Principles**: **Clean Code**, **SOLID**, **DRY** (Don't Repeat Yourself).
 - **Architecture**: Layered Monolith (Controller -> Service -> Repository).
-- **Infrastructure**:
-    - **Database**: MySQL/PostgreSQL with **Liquibase** for versioning.
-    - **Caching**: **Redis** (Lettuce client).
-    - **Message Broker**: **RabbitMQ** (Mandatory for all video/AI processing tasks).
-    - **Documentation**: Swagger 2.9.2.
+
 
 ## 2. Naming Conventions (MUST follow)
 - **Packages**: `com.mgr.api.<module>`

@@ -41,6 +41,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/api/auth/activate/resend", "/api/auth/pwd", "/api/auth/logout", "/actuator/**", "/v1/auth/**").permitAll()
                 .antMatchers("/v1/account/request-forget-password", "/v1/account/forget-password","/v1/account/verify-credential", "/v1/landing/**").permitAll()
                 .antMatchers("/**").authenticated()
+                .and().cors()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
     }

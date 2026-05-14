@@ -5,6 +5,7 @@ public class ErrorCode {
      * General error code
      */
     public static final String GENERAL_ERROR_INVALID_USERNAME_OR_PASSWORD = "ERROR-GENERAL-0000";
+    public static final String BAD_REQUEST = "ERROR-GENERAL-0001";
 
     /**
      * Starting error code Account
@@ -37,4 +38,23 @@ public class ErrorCode {
      */
     public static final String GROUP_ERROR_NOT_FOUND = "ERROR-GROUP-0000";
     public static final String GROUP_ERROR_NAME_EXISTED = "ERROR-GROUP-0001";
+
+    /**
+     * Project error code
+     */
+    public static final String PROJECT_ERROR_NOT_FOUND = "ERROR-PROJECT-0000";
+    public static final String PROJECT_ERROR_UNABLE_CREATE = "ERROR-PROJECT-0001";
+    public static final String PROJECT_ERROR_UNABLE_UPDATE = "ERROR-PROJECT-0002";
+    public static final String PROJECT_ERROR_UNABLE_DELETE = "ERROR-PROJECT-0003";
+    public static final String PROJECT_ERROR_NOT_OWNER = "ERROR-PROJECT-0004";
+
+    /**
+     * Video error code
+     */
+    public static final String VIDEO_ERROR_NOT_FOUND = "ERROR-VIDEO-0000";
+    public static final String VIDEO_ERROR_UPLOAD_FAILED = "ERROR-VIDEO-0001";
+    public static final String VIDEO_ERROR_UNSUPPORTED_FORMAT = "ERROR-VIDEO-0002";
+    public static final String VIDEO_ERROR_FILE_TOO_LARGE = "ERROR-VIDEO-0003";
+    public static final String VIDEO_ERROR_UNABLE_DELETE = "ERROR-VIDEO-0004";
+    public static final String VIDEO_ERROR_NOT_OWNER = "ERROR-VIDEO-0005";
 }

@@ -5,8 +5,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 @Data
 public class ABasicAdminDto {
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(name = "id")
     private Long id;
     @ApiModelProperty(name = "status")
